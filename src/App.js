@@ -43,10 +43,14 @@ class App extends React.Component {
               ws.send(data)
             }
           });
-          recorder.start(1000)
+          console.log("start listening")
+          recorder.start(3000)
         }
         ws.onmessage = (ev) => {
           const recv = JSON.parse(ev.data)
+          const command = recv['command']
+          const confidence = recv['confidence']
+          // {"command": "a", "confidence": 0.29264575242996216}
 
           if (wait) {
             // console.log("not yet handle", recv)
@@ -55,19 +59,25 @@ class App extends React.Component {
 
           console.log("checking action")
           // command to take picture "bắn"
+          // if ((command === "ban") && (confidence > 0.9)) {
           if (true) {
             wait = true
             this.setState({ photoScreen: true })
             this.takePicture()
-            // this.setState({ photoScreen: false })
           }
 
           // command to repeat caption "A"
+          // if ((command === "a") && (confidence > 0.9))
           if (false) {
+            wait = true
             this.props.speak({ text: this.state.caption })
+            setTimeout(() => {
+              wait = false
+            }, 3000)
           }
 
           // command to download image and back to camera "phai"
+          // if ((command === "phai") && (confidence > 0.9))
           if (false) {
             wait = true
             this.downloadImage()
@@ -75,13 +85,18 @@ class App extends React.Component {
             // wait 2 seconds until 
             setTimeout(() => {
               wait = false
-            }, 1000)
+            }, 2000)
           }
 
           // command to get back to camera sreen "trai"
+          // if ((command === "trai") && (confidence > 0.9))
           if (false) {
+            wait = true
             this.setState({ photoScreen: false })
             this.props.speak({ text: "Taking picture" })
+            setTimeout(() => {
+              wait = false
+            }, 1000)
           }
         }
       });
@@ -91,6 +106,7 @@ class App extends React.Component {
         video: true
       })
       .then((stream) => {
+        console.log(stream.getTracks())
         let video = this.videoRef.current;
         video.srcObject = stream;
         video.play();
@@ -107,7 +123,7 @@ class App extends React.Component {
     }).then((response) => {
       console.log(this.props.speak({ text: response.data.caption }))
       this.setState({ caption: response.data.caption }, () => {
-        wait = false
+        // wait = false
 
         // chỗ ngày không cần ở đây, ý là khi có action quẹt trái thì sẽ set photoScreen = false và caption = empty
         // this.setState({ photoScreen: false })
